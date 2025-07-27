@@ -1,0 +1,150 @@
+{
+  "personal": {
+    "name": "Lingampally Venkatesh",
+    "title": "Flutter Android App Developer",
+    "location": "Hyderabad, Telangana",
+    "email": "lingampally.venkey@gmail.com",
+    "phone": "+91 8184926683",
+    "profileImage": "/placeholder.svg?height=200&width=200&text=Venkatesh",
+    "resume": "/resume.pdf",
+    "bio": "Passionate Flutter Android App Developer with over 3 years of experience in building cross-platform mobile applications using Flutter and Firebase. I specialize in crafting production-grade apps with clean architecture, scalable code, and seamless performance.",
+    "tagline": "Crafting Future-Ready Digital Experiences",
+    "yearsExperience": "3+",
+    "appsPublished": "10+",
+    "technologiesMastered": "15+"
+  },
+  "hero": {
+    "greeting": "Hello, I'm",
+    "name": "Lingampally Venkatesh",
+    "title": "Flutter Android App Developer",
+    "subtitle": "Creating exceptional mobile experiences with clean code and innovative solutions",
+    "description": "I specialize in building high-performance Flutter applications that deliver seamless user experiences across Android and iOS platforms. My expertise lies in Firebase integration, state management, and modern development practices.",
+    "cta": {
+      "primary": {
+        "text": "View My Work",
+        "action": "projects"
+      },
+      "secondary": {
+        "text": "Get In Touch",
+        "action": "contact"
+      },
+      "resume": {
+        "text": "Download Resume",
+        "url": "/resume.pdf"
+      }
+    },
+    "stats": [
+      {
+        "value": "3+",
+        "label": "Years Experience",
+        "icon": "⏱️"
+      },
+      {
+        "value": "10+",
+        "label": "Apps Published",
+        "icon": "📱"
+      },
+      {
+        "value": "15+",
+        "label": "Technologies",
+        "icon": "🛠️"
+      },
+      {
+        "value": "100%",
+        "label": "Client Satisfaction",
+        "icon": "⭐"
+      }
+    ],
+    "highlights": [
+      "🚀 Production-ready Flutter applications",
+      "🔥 Firebase & Cloud integration expert",
+      "📱 Cross-platform mobile development",
+      "⚡ Performance optimization specialist"
+    ]
+  },
+  "about": {
+    "timeline": [
+      {
+        "year": "2020",
+        "title": "Started My Computer Science Journey",
+        "description": "Began my B.Tech in Computer Science and Cyber Security at DRK College of Engineering, Hyderabad. Started learning programming fundamentals and mobile app development.",
+        "icon": "🎓",
+        "side": "left"
+      },
+      {
+        "year": "2022",
+        "title": "First Industry Experience",
+        "description": "Joined OSOS Pvt. Ltd. as a Software Developer Intern. Worked on the Sparks social networking app, improved Android performance by 15%, and implemented dark mode functionality.",
+        "icon": "💼",
+        "side": "right"
+      },
+      {
+        "year": "2022–2023",
+        "title": "Flutter Developer at Decrypton",
+        "description": "Developed the Winnable fantasy gaming app and TaskMagnet multi-ecommerce platform. Integrated payment gateways, real-time features, and published apps on the Play Store.",
+        "icon": "📱",
+        "side": "left"
+      },
+      {
+        "year": "2023–2024",
+        "title": "Remote Flutter Developer",
+        "description": "Worked remotely at Alemeno, building complex Flutter applications with the BLoC pattern. Also created automated web scraping tools and built backend services using Django.",
+        "icon": "🚀",
+        "side": "right"
+      },
+      {
+        "year": "2024",
+        "title": "Current Role at StepX",
+        "description": "Currently working as a Flutter Developer at StepX, building high-performance apps using Clean Architecture. Integrated Firebase, OCR features, and reduced app release time by 20%.",
+        "icon": "⚡",
+        "side": "left"
+      },
+      {
+        "year": "Future",
+        "title": "Continuous Growth Ahead",
+        "description": "Focused on expanding my expertise in mobile development, exploring cutting-edge technologies, and contributing to impactful, real-world projects.",
+        "icon": "🌟",
+        "side": "right"
+      }
+    ],
+    "philosophy": [
+      {
+        "title": "Purpose-Driven",
+        "description": "Every line of code I write serves a meaningful purpose and delivers real value.",
+        "icon": "🎯"
+      },
+      {
+        "title": "Innovation First",
+        "description": "I embrace new technologies to build tomorrow's solutions today.",
+        "icon": "🚀"
+      },
+      {
+        "title": "Collaboration",
+        "description": "I believe that great products are built by great teams working toward a common goal.",
+        "icon": "🤝"
+      }
+    ]
+  },
+   "navigation": {
+    "logo": "Venkatesh",
+    "items": [
+      { "id": "home", "label": "Home", "icon": "Home" },
+      { "id": "projects", "label": "Projects", "icon": "Briefcase" },
+      { "id": "skills", "label": "Skills", "icon": "Code" },
+      { "id": "blog", "label": "Blog", "icon": "BookOpen" },
+      { "id": "about", "label": "About", "icon": "User" },
+      { "id": "contact", "label": "Contact", "icon": "MessageCircle" }
+    ]
+  },
+  "theme": {
+    "colors": {
+      "primary": "from-cyan-400 via-purple-400 to-pink-400",
+      "secondary": "from-cyan-500 to-purple-500",
+      "accent": "from-purple-500 to-pink-500"
+    },
+    "animations": {
+      "duration": 0.8,
+      "stagger": 0.1
+    }
+  }
+}
