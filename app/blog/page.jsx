@@ -4,9 +4,7 @@ import ParticleBackground from "@/components/particle-background"
 import ScrollProgress from "@/components/scroll-progress"
 import BlogSection from "@/components/blog-section"
 
-export default function Portfolio() {
-
-
+export default function BlogPage() {
     return (
         <div className="bg-black text-white">
             <ScrollProgress />

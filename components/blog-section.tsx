@@ -2,53 +2,61 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Plus, Edit, Trash2, Eye, Calendar, Clock, Search } from "lucide-react"
+import { Eye, Calendar, Clock, Search } from "lucide-react"
+import { format } from 'date-fns'
 import { useRouter } from "next/navigation"
 
 interface BlogPost {
   id: string
   title: string
   content: string
-  excerpt: string
-  slug: string
-  tags: string[]
+  published: boolean
   createdAt: string
   updatedAt: string
-  readingTime: number
-  published: boolean
 }
 
 export default function BlogSection() {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedTag, setSelectedTag] = useState("")
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  // Load posts from localStorage on component mount
+  // Load posts from API on component mount
   useEffect(() => {
-    const savedPosts = localStorage.getItem("blogPosts")
-    if (savedPosts) {
-      setPosts(JSON.parse(savedPosts))
+    async function fetchBlogs() {
+      try {
+        const response = await fetch('/api/blogs?published=true')
+        if (!response.ok) throw new Error('Failed to fetch blogs')
+        const data = await response.json()
+        setPosts(data)
+      } catch (error) {
+        console.error('Error fetching blogs:', error)
+      } finally {
+        setLoading(false)
+      }
     }
+
+    fetchBlogs()
   }, [])
 
-  const handleDelete = (postId: string) => {
-    if (confirm("Are you sure you want to delete this post?")) {
-      const updatedPosts = posts.filter((post) => post.id !== postId)
-      setPosts(updatedPosts)
-      localStorage.setItem("blogPosts", JSON.stringify(updatedPosts))
-    }
+  const filteredPosts = posts.filter((post) => 
+    post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    post.content.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  function getReadingTime(content: string): number {
+    const wordsPerMinute = 200
+    const wordCount = content.trim().split(/\s+/).length
+    return Math.ceil(wordCount / wordsPerMinute)
   }
 
-  const filteredPosts = posts.filter((post) => {
-    const matchesSearch =
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.content.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesTag = selectedTag === "" || post.tags.includes(selectedTag)
-    return matchesSearch && matchesTag
-  })
-
-  const allTags = Array.from(new Set(posts.flatMap((post) => post.tags)))
+  if (loading) {
+    return (
+      <div className="min-h-screen p-8 flex items-center justify-center">
+        <div className="text-xl text-gray-400">Loading blogs...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen p-8">
@@ -66,7 +74,7 @@ export default function BlogSection() {
           <p className="text-xl text-gray-300">Thoughts, tutorials, and insights from my development journey</p>
         </motion.div>
 
-        {/* Controls */}
+        {/* Search */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -78,116 +86,56 @@ export default function BlogSection() {
               className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 transition-all duration-300"
             />
           </div>
-
-          <select
-            value={selectedTag}
-            onChange={(e) => setSelectedTag(e.target.value)}
-            className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-400 transition-all duration-300"
-          >
-            <option value="">All Tags</option>
-            {allTags.map((tag) => (
-              <option key={tag} value={tag} className="bg-black">
-                {tag}
-              </option>
-            ))}
-          </select>
-
-          <motion.button
-            onClick={() => router.push("/blog/create")}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-xl font-semibold text-white transition-all duration-300"
-          >
-            <Plus size={20} />
-            New Post
-          </motion.button>
+        </div>
         </div>
 
         {/* Blog Posts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredPosts.map((post, index) => (
-            <motion.div
+          {filteredPosts.map((post) => (
+            <motion.article
               key={post.id}
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              whileHover={{ scale: 1.02, y: -5 }}
-              className="group relative"
+              transition={{ duration: 0.5 }}
+              className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-cyan-400/50 transition-all duration-300 cursor-pointer"
+              onClick={() => router.push(`/blog/${post.id}`)}
             >
-              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 h-full">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center text-gray-400 text-sm">
-                    <Calendar size={16} className="mr-2" />
-                    {new Date(post.createdAt).toLocaleDateString()}
-                  </div>
-                  <div className="flex items-center text-gray-400 text-sm">
-                    <Clock size={16} className="mr-2" />
-                    {post.readingTime} min read
-                  </div>
-                </div>
-
-                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">
+              <div className="p-6">
+                <h2 className="text-2xl font-bold text-white mb-4 line-clamp-2">
                   {post.title}
-                </h3>
-
-                <p className="text-gray-300 text-sm mb-4 line-clamp-3">{post.excerpt}</p>
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {post.tags.slice(0, 3).map((tag) => (
-                    <span key={tag} className="px-2 py-1 text-xs bg-white/10 text-cyan-400 rounded-full">
-                      {tag}
-                    </span>
-                  ))}
-                  {post.tags.length > 3 && (
-                    <span className="px-2 py-1 text-xs bg-white/10 text-gray-400 rounded-full">
-                      +{post.tags.length - 3}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <motion.button
-                    onClick={() => router.push(`/blog/${post.slug}`)}
-                    whileHover={{ scale: 1.05 }}
-                    className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors"
-                  >
+                </h2>
+                <p className="text-gray-400 mb-4 line-clamp-3">
+                  {post.content}
+                </p>
+                
+                <div className="flex items-center gap-4 text-sm text-gray-400">
+                  <div className="flex items-center gap-1">
+                    <Calendar size={16} />
+                    <span>{format(new Date(post.createdAt), 'MMM d, yyyy')}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Clock size={16} />
+                    <span>{getReadingTime(post.content)} min read</span>
+                  </div>
+                  <div className="flex items-center gap-1 ml-auto">
                     <Eye size={16} />
-                    Read More
-                  </motion.button>
-
-                  <div className="flex gap-2">
-                    <motion.button
-                      onClick={() => router.push(`/blog/edit/${post.slug}`)}
-                      whileHover={{ scale: 1.1 }}
-                      className="p-2 text-gray-400 hover:text-white transition-colors"
-                    >
-                      <Edit size={16} />
-                    </motion.button>
-                    <motion.button
-                      onClick={() => handleDelete(post.id)}
-                      whileHover={{ scale: 1.1 }}
-                      className="p-2 text-gray-400 hover:text-red-400 transition-colors"
-                    >
-                      <Trash2 size={16} />
-                    </motion.button>
+                    <span>Read More</span>
                   </div>
                 </div>
-
-                {/* Glow Effect */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-cyan-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
-            </motion.div>
+            </motion.article>
           ))}
         </div>
 
+        {/* Empty State */}
         {filteredPosts.length === 0 && (
-          <div className="text-center py-16">
-            <p className="text-gray-400 text-lg">
-              {posts.length === 0 ? "No blog posts yet. Create your first post!" : "No posts match your search."}
+          <div className="text-center py-12">
+            <p className="text-gray-400 text-xl">
+              {posts.length === 0 ? 'No blogs published yet.' : 'No blogs match your search.'}
             </p>
           </div>
         )}
       </div>
-    </div>
+    
   )
 }

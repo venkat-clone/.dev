@@ -25,17 +25,27 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   const router = useRouter()
 
   useEffect(() => {
-    const loadPost = () => {
-      const savedPosts = localStorage.getItem("blogPosts")
-      if (savedPosts) {
-        const posts: BlogPost[] = JSON.parse(savedPosts)
-        const foundPost = posts.find((p) => p.slug === params.slug)
-        setPost(foundPost || null)
+    const fetchPost = async () => {
+      try {
+        const response = await fetch(`/api/blogs/${params.slug}`)
+        if (!response.ok) {
+          if (response.status === 404) {
+            setPost(null)
+            return
+          }
+          throw new Error('Failed to fetch blog post')
+        }
+        const data = await response.json()
+        setPost(data)
+      } catch (error) {
+        console.error('Error fetching post:', error)
+        setPost(null)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
 
-    loadPost()
+    fetchPost()
   }, [params.slug])
 
   const renderMarkdown = (content: string) => {
@@ -63,18 +73,23 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
       .replace(/\n/gim, "<br>")
   }
 
-  const handleEdit = () => {
-    router.push(`/blog/edit/${params.slug}`)
-  }
 
-  const handleDelete = () => {
+
+  const handleDelete = async () => {
     if (confirm("Are you sure you want to delete this post?")) {
-      const savedPosts = localStorage.getItem("blogPosts")
-      if (savedPosts) {
-        const posts: BlogPost[] = JSON.parse(savedPosts)
-        const updatedPosts = posts.filter((p) => p.slug !== params.slug)
-        localStorage.setItem("blogPosts", JSON.stringify(updatedPosts))
-        router.push("/#blog")
+      try {
+        const response = await fetch(`/api/blogs/${params.slug}`, {
+          method: 'DELETE',
+        })
+        
+        if (!response.ok) {
+          throw new Error('Failed to delete post')
+        }
+
+        router.push("/blog")
+      } catch (error) {
+        console.error('Error deleting post:', error)
+        alert('Failed to delete post. Please try again.')
       }
     }
   }
@@ -130,24 +145,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                 Back to Blog
               </motion.button>
 
-              <div className="flex gap-2">
-                <motion.button
-                  onClick={handleEdit}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="p-2 text-gray-400 hover:text-white transition-colors"
-                >
-                  <Edit size={20} />
-                </motion.button>
-                <motion.button
-                  onClick={handleDelete}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="p-2 text-gray-400 hover:text-red-400 transition-colors"
-                >
-                  <Trash2 size={20} />
-                </motion.button>
-              </div>
+              
             </div>
           </div>
         </div>
@@ -200,7 +198,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                 transition={{ duration: 0.6, delay: 0.6 }}
                 className="flex flex-wrap gap-2"
               >
-                {post.tags.map((tag, index) => (
+                {(post.tags||[]).map((tag, index) => (
                   <motion.span
                     key={tag}
                     initial={{ opacity: 0, scale: 0.8 }}
