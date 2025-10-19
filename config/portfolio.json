@@ -1,7 +1,7 @@
 {
   "personal": {
     "name": "Lingampally Venkatesh",
-    "title": "Flutter Android App Developer",
+    "title": "Software Developer",
     "location": "Hyderabad, Telangana",
     "email": "lingampally.venkey@gmail.com",
     "phone": "+91 8184926683",
@@ -16,7 +16,7 @@
   "hero": {
     "greeting": "Hello, I'm",
     "name": "Lingampally Venkatesh",
-    "title": "Flutter Android App Developer",
+    "title": "Software Developer",
     "subtitle": "Creating exceptional mobile experiences with clean code and innovative solutions",
     "description": "I specialize in building high-performance Flutter applications that deliver seamless user experiences across Android and iOS platforms. My expertise lies in Firebase integration, state management, and modern development practices.",
     "cta": {
@@ -40,8 +40,8 @@
         "icon": "⏱️"
       },
       {
-        "value": "10+",
-        "label": "Apps Published",
+        "value": "15+",
+        "label": "Apps Build",
         "icon": "📱"
       },
       {

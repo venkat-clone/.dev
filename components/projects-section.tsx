@@ -14,10 +14,10 @@ export default function ProjectsSection() {
       shortDesc: "OCR-powered pharmaceutical application",
       fullDesc:
         "Improved OCR features in the Flutter app using Google MLKit and Tesseract OCR, fixed critical bugs, and published updates on the Google Play Store. Integrated Firebase Cloud Messaging for real-time notifications.",
-      image: "/placeholder.svg?height=300&width=500&text=Pharma+Vision",
+      image: "/PharmaVision.png?height=300&width=500&text=Pharma+Vision",
       tech: ["Flutter", "Google MLKit", "Tesseract OCR", "Firebase", "Provider"],
-      github: "https://github.com",
-      live: "https://play.google.com",
+      github: "",
+      // live: "",
       color: "from-blue-500 to-cyan-500",
     },
     {
@@ -28,8 +28,8 @@ export default function ProjectsSection() {
         "Developed a fantasy gaming application with real-time cricket and football match updates. Integrated Google Authentication, Firebase Notifications, GPay and PhonePe for wallet functionality, and optimized API calls for enhanced performance.",
       image: "/placeholder.svg?height=300&width=500&text=Winnable",
       tech: ["Flutter", "Firebase", "Google Auth", "GPay", "PhonePe", "Provider"],
-      github: "https://github.com",
-      live: "https://play.google.com",
+      github: "",
+      // live: "",
       color: "from-purple-500 to-pink-500",
     },
     {
@@ -40,8 +40,8 @@ export default function ProjectsSection() {
         "Developed a comprehensive ecommerce platform with grocery shopping, real-time food delivery, package delivery system, and pickup/drop functionality. Implemented dark mode and real-time location tracking for enhanced user experience.",
       image: "/placeholder.svg?height=300&width=500&text=TaskMagnet",
       tech: ["Flutter", "Firebase", "Real-time Location", "Dark Mode", "MVCController"],
-      github: "https://github.com",
-      live: "https://play.google.com",
+      github: "",
+      live: "",
       color: "from-green-500 to-teal-500",
     },
     {
@@ -52,8 +52,8 @@ export default function ProjectsSection() {
         "Developed a full-stack news application with secure user authentication using JWT & Firebase Auth. Implemented state management with Bloc for efficient UI updates and optimized API calls using lazy loading and pagination.",
       image: "/placeholder.svg?height=300&width=500&text=News+App",
       tech: ["Flutter", "Node.js", "Express", "Firebase", "Bloc", "JWT"],
-      github: "https://github.com",
-      live: "https://demo.com",
+      github: "https://github.com/venkat-clone/news",
+      live: "",
       color: "from-orange-500 to-red-500",
     },
     {
@@ -62,10 +62,10 @@ export default function ProjectsSection() {
       shortDesc: "Security tool for ransomware protection",
       fullDesc:
         "Engineered a ransomware decryption tool leveraging AES and RSA encryption for enhanced security. Implemented automated malware detection using SHA-256 hashing and deployed RESTful APIs with Django and JWT authentication.",
-      image: "/placeholder.svg?height=300&width=500&text=RansomAware",
+      image: "/RansomAware.png?height=300&width=500&text=RansomAware",
       tech: ["Python", "Flet", "Django", "AES", "RSA", "SHA-256"],
-      github: "https://github.com",
-      live: "https://demo.com",
+      github: "https://github.com/venkat-clone/ransomAware",
+      live: "",
       color: "from-indigo-500 to-purple-500",
     },
     {
@@ -76,8 +76,8 @@ export default function ProjectsSection() {
         "Developed an AI-powered chatbot using GPT-4 API with DALL·E 2 image generation support. Implemented GetX for reactive state management and secured user authentication using OAuth 2.0 and Firebase Auth.",
       image: "/placeholder.svg?height=300&width=500&text=OpenAI+App",
       tech: ["Flutter", "GPT-4 API", "DALL·E 2", "GetX", "OAuth2", "Firebase"],
-      github: "https://github.com",
-      live: "https://demo.com",
+      github: "https://github.com/venkat-clone/open_ai",
+      live: "",
       color: "from-yellow-500 to-orange-500",
     },
   ]
@@ -195,24 +195,24 @@ export default function ProjectsSection() {
                         </div>
 
                         <div className="flex gap-4">
-                          <a
-                            href={project.github}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
+                          {project.github && <a
+                              href={project.github}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
                           >
-                            <Github size={20} />
+                            <Github size={20}/>
                             View Code
-                          </a>
-                          <a
-                            href={project.live}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white rounded-full transition-colors"
+                          </a>}
+                          {project.live && <a
+                              href={project.live}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white rounded-full transition-colors"
                           >
-                            <ExternalLink size={20} />
+                            <ExternalLink size={20}/>
                             Live Demo
-                          </a>
+                          </a>}
                         </div>
                       </div>
                     </>
