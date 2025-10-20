@@ -18,8 +18,9 @@ export default function AdminLayout({
   }
 
   if (!session) {
-    router.push('/admin/login')
-    return null
+    return (
+        children
+    )
   }
 
   return (
@@ -53,7 +54,7 @@ export default function AdminLayout({
               </div>
             </div>
             <div className="flex items-center">
-              <span className="text-gray-500 mr-4">{session.user?.email}</span>
+              <span className="text-gray-500 mr-4">{session?.user?.email}</span>
               <Button
                 variant="destructive"
                 onClick={() => signOut({ callbackUrl: '/admin/login' })}
