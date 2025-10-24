@@ -1,19 +1,19 @@
-"use client"
-
-import { useEffect, useState, useMemo, useCallback } from "react"
+import { GetServerSideProps } from "next"
 import { motion } from "framer-motion"
 import ReactMarkdown from "react-markdown"
 import {
-  Calendar, Clock, Tag, ArrowLeft, Edit, Trash2, ChevronUp, Copy, Eye
+  Calendar, Clock, Tag, ArrowLeft, Eye,
+  ChevronUp
 } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
+import { format, parseISO } from "date-fns"
 import rehypeRaw from "rehype-raw"
 import remarkGfm from "remark-gfm"
 import remarkMath from "remark-math"
 import rehypeKatex from "rehype-katex"
 import ParticleBackground from "@/components/particle-background"
-import { format, parseISO } from "date-fns"
+// import "../../styles/global.css";  // Path to your global CSS file
+import "../../styles/globals.css"
+
 import "katex/dist/katex.min.css"
 
 // ==================== INTERFACES ====================
@@ -32,6 +32,11 @@ interface BlogPost {
 }
 
 interface ApiError { message: string; status?: number }
+
+interface BlogPostPageProps {
+  post: BlogPost | null
+  error: ApiError | null
+}
 
 // ==================== CONSTANTS ====================
 const CONTAINER_MAX_WIDTH = "max-w-7xl"
@@ -94,188 +99,79 @@ const CustomP = ({ children }: { children: React.ReactNode }) => (
 )
 
 // ==================== MAIN COMPONENT ====================
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
-  // 🪝 ALL HOOKS - TOP LEVEL
-  const [post, setPost] = useState<BlogPost | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<ApiError | null>(null)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [isCopying, setIsCopying] = useState(false)
-  const router = useRouter()
-
-  // 📡 API Calls
-  const fetchPost = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      setPost(null)
-
-      const response = await fetch(`/api/blogs/${params.slug}`, {
-        next: { revalidate: 60 }
+export default function BlogPostPage({ post, error }: BlogPostPageProps) {
+  // Computed table of contents
+  const tableOfContents = post?.content
+    ? (post.content.match(/^(#{1,3})\s+(.+)$/gim) || []).slice(0, 10).map((header) => {
+        const match = header.match(/^(#{1,3})\s+(.+)$/)
+        const level = match?.[1].length || 1
+        const text = match?.[2].trim() || ''
+        return {
+          id: text.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          text,
+          level
+        }
       })
-
-      if (response.status === 404) throw new Error("Post not found")
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || `HTTP ${response.status}`)
-      }
-
-      const data = await response.json()
-      setPost(data)
-    } catch (err) {
-      const error = err as Error
-      setError({ message: error.message })
-      toast.error(error.message)
-    } finally {
-      setLoading(false)
-    }
-  }, [params.slug])
-
-  const deletePost = useCallback(async () => {
-    try {
-      const response = await fetch(`/api/blogs/${params.slug}`, { method: 'DELETE' })
-      if (!response.ok) throw new Error('Failed to delete')
-      toast.success("Post deleted!")
-      router.push("/blog")
-    } catch {
-      toast.error("Delete failed")
-    }
-  }, [params.slug, router])
-
-  // 🎨 Computed Values
-  const tableOfContents = useMemo(() => {
-    if (!post?.content) return []
-    const headers = post.content.match(/^(#{1,3})\s+(.+)$/gim) || []
-    return headers.slice(0, 10).map((header) => {
-      const match = header.match(/^(#{1,3})\s+(.+)$/)
-      const level = match?.[1].length || 1
-      const text = match?.[2].trim() || ''
-      return {
-        id: text.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        text,
-        level
-      }
-    })
-  }, [post?.content])
-
-  // 🚀 Event Handlers
-  const copyToClipboard = useCallback(async () => {
-    if (!navigator.clipboard) return toast.error("Copy not supported")
-    setIsCopying(true)
-    try {
-      await navigator.clipboard.writeText(window.location.href)
-      toast.success("Copied!")
-    } catch {
-      toast.error("Copy failed")
-    } finally {
-      setIsCopying(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchPost()
-  }, [fetchPost])
+    : []
 
   // ==================== RENDER ====================
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       <ParticleBackground />
       <div className="relative z-10">
-
         {/* 📌 Sticky Header */}
-        <StickyHeader
-          onBack={() => router.push("/blog")}
-          onCopy={copyToClipboard}
-          isCopying={isCopying}
-          views={post?.views || 0}
-          published={post?.published}
-        />
+        <StickyHeader views={post?.views || 0} published={!!post?.published} />
 
         <div className={CONTAINER_MAX_WIDTH + " mx-auto px-4 py-12"}>
           {renderContent({
-            loading,
             error,
             post,
             tableOfContents,
-            onRetry: fetchPost,
-            onBack: () => router.push("/blog"),
-            onEdit: () => router.push(`/admin/edit/${post?.slug}`),
-            onDelete: () => setShowDeleteConfirm(true),
             showTOC: tableOfContents.length >= TOC_MIN_HEADERS
           })}
         </div>
-
-        {/* 🗑️ Delete Modal */}
-        {showDeleteConfirm && (
-          <DeleteModal
-            onConfirm={deletePost}
-            onCancel={() => setShowDeleteConfirm(false)}
-          />
-        )}
       </div>
     </div>
   )
 }
 
-// ==================== SUB-COMPONENTS (UNCHANGED) ====================
-function StickyHeader({ onBack, onCopy, isCopying, views, published }: any) {
+// ==================== SUB-COMPONENTS ====================
+function StickyHeader({ views, published }: { views: number; published: boolean }) {
   return (
     <header className="sticky top-0 backdrop-blur-xl bg-black/30 border-b border-white/10 z-50">
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <motion.button onClick={onBack} whileHover={{ scale: 1.05 }} className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
+          <a href="/blog" className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
             <ArrowLeft size={20} /> Blog
-          </motion.button>
-          <div className="flex items-center gap-4">
-            <motion.button onClick={onCopy} disabled={isCopying} whileHover={{ scale: 1.05 }} className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-white transition-all disabled:opacity-50">
-              {isCopying ? <Clock size={16} /> : <Copy size={16} />} Share
-            </motion.button>
-            {published && (
-              <motion.button whileHover={{ scale: 1.05 }} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-xl text-white">
-                <Eye size={16} /> {views} views
-              </motion.button>
-            )}
-          </div>
+          </a>
+
         </div>
       </div>
     </header>
   )
 }
 
-function renderContent({ loading, error, post, tableOfContents, onRetry, onBack, onEdit, onDelete, showTOC }: any) {
-  if (loading) return <LoadingState />
-  if (error) return <ErrorState error={error} onRetry={onRetry} onBack={onBack} />
-  if (!post) return <ErrorState error={{ message: "Post not found" }} onRetry={onBack} onBack={onBack} />
+function renderContent({ error, post, tableOfContents, showTOC }: any) {
+  if (error) return <ErrorState error={error} />
+  if (!post) return <ErrorState error={{ message: "Post not found" }} />
 
   return (
     <div className="grid lg:grid-cols-4 gap-12">
       <Article post={post} />
-      <Sidebar tableOfContents={tableOfContents} showTOC={showTOC} onEdit={onEdit} onDelete={onDelete} published={post.published} />
+      <Sidebar tableOfContents={tableOfContents} showTOC={showTOC} published={post.published} />
     </div>
   )
 }
 
-function LoadingState() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400" />
-      <p className="text-gray-400">Loading post...</p>
-    </div>
-  )
-}
-
-function ErrorState({ error, onRetry, onBack }: any) {
+function ErrorState({ error }: { error: ApiError }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 text-center max-w-md mx-auto">
       <h1 className="text-4xl font-bold text-white">Post Not Found</h1>
       <p className="text-gray-300">{error.message}</p>
       <div className="space-y-2">
-        <motion.button onClick={onBack} whileHover={{ scale: 1.05 }} className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-xl font-semibold text-white">
+        <a href="/blog" className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-xl font-semibold text-white">
           <ArrowLeft size={20} /> Back to Blog
-        </motion.button>
-        <motion.button onClick={onRetry} whileHover={{ scale: 1.05 }} className="px-6 py-3 bg-white/20 text-white rounded-xl">
-          {error.message === "Post not found" ? "Go to Blog" : "Retry"}
-        </motion.button>
+        </a>
       </div>
     </div>
   )
@@ -311,13 +207,11 @@ function Article({ post }: { post: BlogPost }) {
         </motion.div>
       </header>
 
-      {/* 🔥 PROPER REACT MARKDOWN RENDERING */}
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkMath]}
           rehypePlugins={[rehypeKatex, [rehypeRaw, { clobberPrefix: "custom-" }]]}
           components={{
-            
             h1: CustomH1,
             h2: CustomH2,
             h3: CustomH3,
@@ -328,7 +222,6 @@ function Article({ post }: { post: BlogPost }) {
             li: CustomLi,
             p: CustomP
           }}
-          // className="prose prose-invert max-w-none"
         >
           {post.content}
         </ReactMarkdown>
@@ -337,8 +230,7 @@ function Article({ post }: { post: BlogPost }) {
   )
 }
 
-// Sidebar, DeleteModal remain UNCHANGED...
-function Sidebar({ tableOfContents, showTOC, onEdit, onDelete, published }: any) {
+function Sidebar({ tableOfContents, showTOC, published }: any) {
   return (
     <motion.aside initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.2 }} className="lg:col-span-1 sticky top-24 h-fit space-y-8">
       {showTOC && (
@@ -355,34 +247,55 @@ function Sidebar({ tableOfContents, showTOC, onEdit, onDelete, published }: any)
           </nav>
         </div>
       )}
-      {!published && (
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
-          <h3 className="text-lg font-semibold text-white">Admin Actions</h3>
-          <div className="space-y-2">
-            <motion.button whileHover={{ scale: 1.02 }} onClick={onEdit} className="w-full flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-xl transition-all">
-              <Edit size={16} /> Edit Post
-            </motion.button>
-            <motion.button whileHover={{ scale: 1.02 }} onClick={onDelete} className="w-full flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-xl transition-all">
-              <Trash2 size={16} /> Delete Post
-            </motion.button>
-          </div>
-        </div>
-      )}
     </motion.aside>
   )
 }
 
-function DeleteModal({ onConfirm, onCancel }: any) {
-  return (
-    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white/10 border border-white/20 rounded-2xl p-8 max-w-md w-full">
-        <h3 className="text-2xl font-bold text-white mb-4">Delete Post?</h3>
-        <p className="text-gray-300 mb-6">This action cannot be undone.</p>
-        <div className="flex gap-3">
-          <button onClick={onConfirm} className="flex-1 px-4 py-2 bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 transition-colors">Delete</button>
-          <button onClick={onCancel} className="flex-1 px-4 py-2 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-colors">Cancel</button>
-        </div>
-      </div>
-    </motion.div>
-  )
+// ==================== SERVER-SIDE DATA FETCHING ====================
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { slug } = context.params as { slug: string }
+
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/blogs/${slug}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (response.status === 404) {
+      return {
+        props: {
+          post: null,
+          error: { message: "Post not found" }
+        }
+      }
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      return {
+        props: {
+          post: null,
+          error: { message: errorData.message || `HTTP ${response.status}` }
+        }
+      }
+    }
+
+    const post: BlogPost = await response.json()
+
+    return {
+      props: {
+        post,
+        error: null
+      }
+    }
+  } catch (err) {
+    const error = err as Error
+    return {
+      props: {
+        post: null,
+        error: { message: error.message || "Failed to fetch post" }
+      }
+    }
+  }
 }

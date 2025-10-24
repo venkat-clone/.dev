@@ -66,6 +66,10 @@ export default function Portfolio() {
         <section id="projects">
           <ProjectsSection />
         </section>
+        
+        <section id="blog">
+          <BlogSection />
+        </section>
 
         <section id="skills">
           <SkillsSection />
@@ -75,9 +79,6 @@ export default function Portfolio() {
           <AboutSection />
         </section>
 
-        <section id="blog">
-          <BlogSection />
-        </section>
 
         <section id="contact">
           <ContactSection />
