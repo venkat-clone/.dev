@@ -6,6 +6,7 @@ import {
   ChevronUp
 } from "lucide-react"
 import { format, parseISO } from "date-fns"
+import { prisma } from '@/lib/prisma';
 import rehypeRaw from "rehype-raw"
 import remarkGfm from "remark-gfm"
 import remarkMath from "remark-math"
@@ -21,12 +22,12 @@ interface BlogPost {
   id: string
   title: string
   content: string
-  excerpt: string
-  slug: string
-  tags: string[]
-  createdAt: string
-  updatedAt: string
-  readingTime: number
+  // excerpt: string
+  // slug: string
+  // tags: string[]
+  createdAt: string | Date
+  updatedAt: string | Date
+  // readingTime: number
   published: boolean
   views?: number
 }
@@ -256,13 +257,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { slug } = context.params as { slug: string }
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/blogs/${slug}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
 
-    if (response.status === 404) {
+      const blog = await prisma.blog.findUnique({
+          where: { id: slug }
+        });
+    
+
+    if (!blog) {
       return {
         props: {
           post: null,
@@ -271,17 +272,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     }
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      return {
-        props: {
-          post: null,
-          error: { message: errorData.message || `HTTP ${response.status}` }
-        }
-      }
-    }
 
-    const post: BlogPost = await response.json()
+    const post: BlogPost = {
+      ...blog,
+      createdAt: blog.createdAt.toISOString(),
+  updatedAt: blog.updatedAt.toISOString(),
+
+    }
 
     return {
       props: {
@@ -291,6 +288,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   } catch (err) {
     const error = err as Error
+    console.log(error);
     return {
       props: {
         post: null,
