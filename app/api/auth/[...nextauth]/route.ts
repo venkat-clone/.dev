@@ -1,5 +1,6 @@
-import NextAuth, {DefaultSession} from "next-auth"
+import NextAuth, {DefaultSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+
 import { compare,hash } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 
@@ -72,7 +73,45 @@ const handler = NextAuth({
       }
       return newSession
     }
-  }
+  },
+  cookies: {
+    sessionToken: {
+      name: `__Secure-next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: true,
+      },
+    },
+    callbackUrl: {
+      name: `__Secure-next-auth.callback-url`,
+      options: {
+        sameSite: 'lax',
+        path: '/',
+        secure: true,
+      },
+    },
+    csrfToken: {
+      name: `__Host-next-auth.csrf-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: true,
+      },
+    },
+    // Optional: for PKCE flow
+    pkceCodeVerifier: {
+      name: `__Secure-next-auth.pkce.code_verifier`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: true,
+      },
+    },
+  },
 })
 
 

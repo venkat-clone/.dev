@@ -63,7 +63,7 @@ export default function SkillsSection() {
                                 initial={{ width: 0 }}
                                 animate={{ width: `${skill.level}%` }}
                                 transition={{ duration: 0.8, delay: categoryIndex * 0.1 + skillIndex * 0.05 + 0.2 }}
-                                className={`h-full ${category.color}  rounded-full relative`}
+                                className={`h-full bg-red-500  rounded-full relative`}
                             />
                           </div>
                         </motion.div>

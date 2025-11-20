@@ -100,9 +100,9 @@ export default function ContactSection() {
           <p className="text-xl text-gray-300">Let's connect and build something amazing together</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-12">
           {/* Contact Form */}
-          <motion.div 
+          {/* <motion.div 
            initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -197,7 +197,7 @@ export default function ContactSection() {
                   )}
                 </span>
 
-                {/* Wave Effect */}
+             
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500"
                   initial={{ x: "-100%" }}
@@ -208,7 +208,7 @@ export default function ContactSection() {
             </form>
             
           </motion.div >
-          {/* Availability Status */}
+     
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -222,7 +222,7 @@ export default function ContactSection() {
               <p className="text-gray-300 text-sm">Currently accepting new freelance projects and collaborations</p>
             </motion.div>
           </motion.div>
-          
+           */}
 
           {/* Contact Info */}
           <motion.div
